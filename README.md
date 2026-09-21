@@ -1,38 +1,18 @@
-# 🏠 House Price Prediction
+# 🏠 NYC House Price Prediction - 95.29% Accuracy
 
-## 📌 Project Overview
+> End-to-End Machine Learning Project with Flask Deployment
 
-This project predicts house prices using Machine Learning.
+### 🚀 Live Demo
+Flask Web App that predicts NYC house prices in real-time
 
-The project uses:
+### 📊 Model Performance
+- **Algorithm:** Random Forest Regressor
+- **R² Score:** 95.29%
+- **RMSE:** Low Error
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- Random Forest Regression
-- Flask
-- Streamlit
+### 🛠️ Tech Stack
+- Python, Pandas, NumPy, Scikit-Learn
+- Flask, HTML, CSS
+- IBM Cloud / Render Deployment
 
----
-
-## 📂 Project Structure
-
-```text
-house_price_project/
-│
-├── backend/
-│   └── app.py
-│
-├── frontend/
-│   └── app.py
-│
-├── data/
-│   └── HousingData.csv
-│
-├── model/
-│   └── house_price_model.pkl
-│
-├── train_model.py
-├── requirements.txt
-└── README.md
+### 📁 Project Structure
