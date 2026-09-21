@@ -1,2 +1,38 @@
-# NYC-House-Price-Prediction
-US New York City House Price Prediction using ML | Flask | Gradient Boosting | 95.29% R2 Score | Citi Ready Project
+# 🏠 House Price Prediction
+
+## 📌 Project Overview
+
+This project predicts house prices using Machine Learning.
+
+The project uses:
+
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Random Forest Regression
+- Flask
+- Streamlit
+
+---
+
+## 📂 Project Structure
+
+```text
+house_price_project/
+│
+├── backend/
+│   └── app.py
+│
+├── frontend/
+│   └── app.py
+│
+├── data/
+│   └── HousingData.csv
+│
+├── model/
+│   └── house_price_model.pkl
+│
+├── train_model.py
+├── requirements.txt
+└── README.md
