@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>House Price Prediction</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+
+            font-family: Arial, sans-serif;
+
+            background: #f3f6fb;
+        }
+
+        .container {
+
+            max-width: 900px;
+
+            margin: auto;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.10);
+        }
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #666;
+
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 18px;
+        }
+
+        .field {
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+        label {
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+        }
+
+        input {
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 7px;
+
+            font-size: 15px;
+        }
+
+        input:focus {
+
+            outline: none;
+
+            border-color: #2563eb;
+        }
+
+        button {
+
+            width: 100%;
+
+            margin-top: 25px;
+
+            padding: 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+
+            background: #1d4ed8;
+        }
+
+        #result {
+
+            margin-top: 25px;
+
+            padding: 18px;
+
+            text-align: center;
+
+            border-radius: 8px;
+
+            font-size: 19px;
+
+            font-weight: bold;
+        }
+
+        .success {
+
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+        .error {
+
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+        @media(max-width:700px) {
+
+            .form-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+
+                padding: 20px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <h1>🏠 House Price Prediction</h1>
+
+    <p class="subtitle">
+        Machine Learning Based House Price Prediction
+    </p>
+
+
+    <form
+        id="predictionForm"
+        method="POST"
+    >
+
+        <div class="form-grid">
+
+            {% for feature in features %}
+
+            <div class="field">
+
+                <label for="{{ feature }}">
+                    {{ feature }}
+                </label>
+
+                <input
+                    type="text"
+                    id="{{ feature }}"
+                    name="{{ feature }}"
+                    placeholder="Enter {{ feature }}"
+                    required
+                >
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <button type="submit"
+                id="predictButton">
+
+            🔮 Predict Price
+
+        </button>
+
+    </form>
+
+
+    <div id="result"></div>
+
+</div>
+
+
+<script>
+
+const form =
+    document.getElementById("predictionForm");
+
+const result =
+    document.getElementById("result");
+
+const button =
+    document.getElementById("predictButton");
+
+
+form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    button.disabled = true;
+
+    button.innerText = "⏳ Predicting...";
+
+    result.innerHTML = "";
+
+    result.className = "";
+
+
+    try {
+
+        const formData =
+            new FormData(form);
+
+
+        const response =
+            await fetch("/predict", {
+
+                method: "POST",
+
+                body: formData
+
+            });
+
+
+        const data =
+            await response.json();
+
+
+        if (data.success) {
+
+            result.className = "success";
+
+            result.innerHTML =
+                "🏠 Predicted Price: ₹ " +
+                data.predicted_price;
+
+        }
+
+        else {
+
+            result.className = "error";
+
+            result.innerHTML =
+                "❌ " + data.error;
+
+        }
+
+
+    }
+
+    catch(error) {
+
+        result.className = "error";
+
+        result.innerHTML =
+            "❌ Server Error: " +
+            error.message;
+
+    }
+
+
+    button.disabled = false;
+
+    button.innerText =
+        "🔮 Predict Price";
+
+});
+
+</script>
+
+
+</body>
+
+</html>
