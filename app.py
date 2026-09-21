@@ -4,23 +4,27 @@ import pickle
 import pandas as pd
 
 # ============================================================
-# PATHS
+# HOUSE PRICE PREDICTION - FLASK BACKEND
 # ============================================================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+CURRENT_DIR = Path(__file__).resolve().parent
 
-TEMPLATE_DIR = BASE_DIR / "templates"
-MODEL_PATH = BASE_DIR / "model" / "house_price_model.pkl"
-DATA_PATH = BASE_DIR / "Data" / "train.csv"
-
-# ============================================================
-# FLASK
-# ============================================================
+# Flask ko explicitly templates folder bata rahe hain
+TEMPLATE_DIR = CURRENT_DIR / "templates"
 
 app = Flask(
     __name__,
     template_folder=str(TEMPLATE_DIR)
 )
+
+# ============================================================
+# PROJECT PATHS
+# ============================================================
+
+BASE_DIR = CURRENT_DIR.parent
+
+MODEL_PATH = BASE_DIR / "model" / "house_price_model.pkl"
+DATA_PATH = BASE_DIR / "Data" / "train.csv"
 
 # ============================================================
 # LOAD MODEL
@@ -37,61 +41,24 @@ else:
     features = None
 
 # ============================================================
-# LOAD DATA
+# LOAD FEATURES
 # ============================================================
 
-df = pd.read_csv(DATA_PATH)
-
-# If features were not saved inside pickle
 if not features:
-
-    target_columns = [
-        "price",
-        "medv",
-        "target",
-        "price_in_lacs",
-        "TARGET(PRICE_IN_LACS)"
-    ]
+    df = pd.read_csv(DATA_PATH)
 
     features = [
-        col for col in df.columns
-        if col.lower() not in [
-            x.lower() for x in target_columns
-        ]
+        column
+        for column in df.columns
+        if column.lower() != "medv"
     ]
 
 features = list(features)
 
-# ============================================================
-# FEATURE TYPES
-# ============================================================
-
-numeric_features = []
-
-for feature in features:
-
-    if feature in df.columns:
-
-        if pd.api.types.is_numeric_dtype(df[feature]):
-            numeric_features.append(feature)
-
-# ============================================================
-# DEBUG INFORMATION
-# ============================================================
-
-print("\n==========================================")
-print("HOUSE PRICE PREDICTION")
-print("==========================================")
-print("Template:", TEMPLATE_DIR)
-print("Index:", TEMPLATE_DIR / "index.html")
-print("Index exists:", (TEMPLATE_DIR / "index.html").exists())
-print("\nFeatures:")
-
-for feature in features:
-    print("-", feature)
-
-print("==========================================\n")
-
+print("Model loaded successfully.")
+print("Templates folder:", TEMPLATE_DIR)
+print("Template exists:", (TEMPLATE_DIR / "index.html").exists())
+print("Features:", features)
 
 # ============================================================
 # HOME
@@ -99,13 +66,10 @@ print("==========================================\n")
 
 @app.route("/")
 def home():
-
     return render_template(
         "index.html",
-        features=features,
-        numeric_features=numeric_features
+        features=features
     )
-
 
 # ============================================================
 # PREDICT
@@ -115,111 +79,44 @@ def home():
 def predict():
 
     try:
-
-        # ----------------------------------------------------
-        # Accept normal HTML form OR JSON
-        # ----------------------------------------------------
-
-        if request.is_json:
-
-            data = request.get_json(silent=True)
-
-        else:
-
-            data = request.form.to_dict()
-
-        # ----------------------------------------------------
-        # Check data
-        # ----------------------------------------------------
+        data = request.get_json()
 
         if not data:
-
             return jsonify({
                 "success": False,
-                "error": "Please enter house details."
+                "error": "No input data received."
             }), 400
 
-        # ----------------------------------------------------
-        # Missing fields
-        # ----------------------------------------------------
-
-        missing = []
-
-        for feature in features:
-
-            if feature not in data:
-                missing.append(feature)
+        missing = [
+            feature
+            for feature in features
+            if feature not in data
+        ]
 
         if missing:
-
             return jsonify({
                 "success": False,
-                "error": "Please fill all required fields.",
-                "missing": missing
+                "error": "Missing features.",
+                "missing_features": missing
             }), 400
-
-        # ----------------------------------------------------
-        # Prepare input
-        # ----------------------------------------------------
 
         input_data = {}
 
         for feature in features:
-
-            value = data.get(feature, "")
-
-            if str(value).strip() == "":
-
-                return jsonify({
-                    "success": False,
-                    "error": f"Please enter {feature}."
-                }), 400
-
-            # Numeric columns
-            if feature in numeric_features:
-
-                input_data[feature] = [
-                    float(value)
-                ]
-
-            # Text columns
-            else:
-
-                input_data[feature] = [
-                    str(value).strip()
-                ]
-
-        # ----------------------------------------------------
-        # DataFrame
-        # ----------------------------------------------------
+            input_data[feature] = [
+                float(data[feature])
+            ]
 
         input_df = pd.DataFrame(input_data)
 
-        # Keep same order as training
-        input_df = input_df[features]
-
-        print("\nInput received:")
-        print(input_df)
-
-        # ----------------------------------------------------
-        # Prediction
-        # ----------------------------------------------------
-
         prediction = model.predict(input_df)
-
-        price = float(prediction[0])
-
-        print("Prediction:", price)
 
         return jsonify({
             "success": True,
-            "predicted_price": round(price, 2)
+            "predicted_price": round(float(prediction[0]), 2)
         })
 
     except Exception as error:
-
-        print("\nPREDICTION ERROR:")
-        print(error)
 
         return jsonify({
             "success": False,
@@ -232,7 +129,6 @@ def predict():
 # ============================================================
 
 if __name__ == "__main__":
-
     app.run(
         host="127.0.0.1",
         port=5000,
